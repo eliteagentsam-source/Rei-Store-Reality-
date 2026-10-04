@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Skor Event Reality</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 20px; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; }
+        label { font-weight: bold; margin-top: 10px; display: block; }
+        input[type="text"], input[type="number"] { width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        .price-box { background-color: #e9ecef; padding: 15px; border-radius: 5px; text-align: center; font-size: 18px; margin-bottom: 20px; }
+        .price-box span { font-weight: bold; color: #28a745; font-size: 24px; }
+        button { width: 100%; padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; font-weight: bold;}
+        button:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Form Order Skor Event</h2>
+    <form id="orderForm">
+        <label for="namaReality">Nama Akun Reality Pembeli:</label>
+        <input type="text" id="namaReality" name="namaReality" placeholder="Masukkan nama akun..." required>
+
+        <label for="kontak">Kontak Pembayaran (WA/IG):</label>
+        <input type="text" id="kontak" name="kontak" placeholder="Contoh: WA 0812345678" required>
+
+        <label for="nominalSkor">Nominal Skor (Kelipatan 50.000):</label>
+        <!-- Input dikunci kelipatan 50.000 menggunakan atribut step -->
+        <input type="number" id="nominalSkor" name="nominalSkor" min="50000" step="50000" required oninput="hitungHarga()">
+
+        <div class="price-box">
+            Total yang harus dibayar:<br>
+            Rp <span id="displayHarga">0</span>
+        </div>
+        
+        <!-- Input tersembunyi untuk mengirim total harga ke spreadsheet -->
+        <input type="hidden" id="totalHarga" name="totalHarga">
+
+        <button type="submit" id="submitBtn">Kirim Pesanan</button>
+    </form>
+</div>
+
+<script>
+    // Fungsi menghitung harga otomatis
+    function hitungHarga() {
+        const skor = document.getElementById('nominalSkor').value;
+        // Logika: Per 50.000 skor = Rp 30.000
+        const harga = (Math.floor(skor / 50000)) * 30000; 
+        
+        // Tampilkan dengan format angka Rupiah
+        document.getElementById('displayHarga').innerText = harga.toLocaleString('id-ID');
+        document.getElementById('totalHarga').value = harga;
+    }
+
+    // Fungsi saat tombol form ditekan
+    document.getElementById('orderForm').addEventListener('submit', function(e) {
+        e.preventDefault(); // Mencegah reload halaman
+        
+        const btn = document.getElementById('submitBtn');
+        btn.innerText = 'Mengirim...';
+        btn.disabled = true;
+
+        const formData = new FormData(this);
+        // GANTI URL DI BAWAH INI DENGAN URL WEB APP DARI LANGKAH 2
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbzEuW9jqI2TC3It1ACPQiLMTati9glqMo0AG-hIWXLc_fde6pVQr7t_3rqk_CfsSSY/exec';
+
+        fetch(scriptURL, { method: 'POST', body: formData})
+            .then(response => {
+                alert('Pesanan berhasil dikirim! Silakan selesaikan pembayaran.');
+                document.getElementById('orderForm').reset();
+                document.getElementById('displayHarga').innerText = '0';
+                btn.innerText = 'Kirim Pesanan';
+                btn.disabled = false;
+            })
+            .catch(error => {
+                console.error('Error!', error.message);
+                alert('Gagal mengirim pesanan. Silakan coba lagi.');
+                btn.innerText = 'Kirim Pesanan';
+                btn.disabled = false;
+            });
+    });
+</script>
+
+</body>
+</html>
